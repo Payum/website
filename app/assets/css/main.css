@@ -1,0 +1,408 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Nocturne, retuned for Payum.
+
+   The design system's own tokens live in `styles.css` upstream; this file is
+   the Tailwind-native port of them, with the Payum theme override (crimson
+   accent on a near-black ground) folded in. Every value on the site comes
+   from here — never hard-code a hex, a radius or a shadow in a component.
+   ────────────────────────────────────────────────────────────────────── */
+
+@theme static {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Grounds — lifted off near-black. #17161c read as crushed and flat; these
+     sit high enough to carry texture and ambient light while every text token
+     still clears AA (worst case 4.99:1 on surface, measured). */
+  --color-ground: #1b1922;
+  --color-surface: #272531;
+  --color-sunken: #201e29;
+
+  /* Two light sources rather than one. Crimson is the brand; amber is the warm
+     counterweight that stops the page reading as a single hue. Both are the
+     peak of a radial bloom, never a fill. */
+  --color-glow: #551916;
+  --color-glow-warm: #4d3f19;
+
+  /* Amber secondary. Never used for a primary action — crimson keeps that job
+     alone — but it carries atmosphere, rules and secondary emphasis. */
+  --color-warm: #e0c16a;
+  --color-warm-dim: #c9a84f;
+
+  /* Accent — Payum crimson, on the shared OKLCH lightness scale. 100-900 are
+     the design's ramp; 50 and 950 extend it for Nuxt UI, which wants 11 steps. */
+  --color-payum: #df2920;
+  --color-payum-50: #fef8f8;
+  --color-payum-100: #fef3f3;
+  --color-payum-200: #fce0de;
+  --color-payum-300: #f6bdba;
+  --color-payum-400: #eb908b;
+  --color-payum-500: #d8554e;
+  --color-payum-600: #a71c15;
+  --color-payum-700: #821611;
+  --color-payum-800: #57110e;
+  --color-payum-900: #350d0b;
+  --color-payum-950: #1f0706;
+
+  /* Neutral ink — same lightness scale, so a step matches the accent's step. */
+  --color-ink: #ebe9ea;
+  --color-ink-50: #fbfafa;
+  --color-ink-100: #f6f4f5;
+  --color-ink-200: #e8e5e7;
+  --color-ink-300: #d3cfd1;
+  --color-ink-400: #b7b2b5;
+  --color-ink-500: #989397;
+  --color-ink-600: #7a757a;
+  --color-ink-700: #5d595d;
+  --color-ink-800: #423f43;
+  --color-ink-900: #2b292c;
+  --color-ink-950: #17161c;
+
+  /* Syntax colors for the PHP samples. */
+  --color-code-plain: #cfccd4;
+  --color-code-keyword: #eb908b;
+  --color-code-string: #9dc9a4;
+  /* Lightened from #75727e (3.35:1 on surface) so a commented snippet
+     doesn't ship an AA failure the day someone adds one. */
+  --color-code-comment: #9a97a4;
+  --color-code-symbol: #f6bdba;
+  --color-code-variable: #ebe9ea;
+  --color-code-number: #e0b06a;
+  --color-code-punctuation: #96939e;
+
+  /* Payment lifecycle. The one place on this site where colour carries
+     information rather than atmosphere: a developer scanning STATUS_* wants to
+     see at a glance which states mean money moved, which are still in flight,
+     and which ended without a capture.
+
+     The hues are drawn from the syntax palette already on screen in the code
+     windows, so the constants read as the code they are instead of importing a
+     second colour language. `pending` is tuned darker than --color-code-number
+     (#e0b06a) on purpose: amber against green is the classic red-green
+     deficiency pair, and at the syntax value the two tiers were 1.07 apart in
+     luminance — indistinguishable under deuteranopia. At #c9964f they separate
+     by 1.33 simulated, while still clearing AA on the walk highlight.
+
+     Colour only ever reinforces here. Every row states its own meaning in
+     text, so nothing is carried by hue alone. */
+  --color-state-new: #cfccd4;
+  --color-state-pending: #c9964f;
+  --color-state-settled: #9dc9a4;
+  --color-state-ended: #9a97a4;
+
+  /* Radius — density 0.70x, 8px base. */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+
+  /* Elevation: on a dark ground it is a hairline edge plus ambient darkness,
+     never a stack of soft shadows. */
+  --shadow-sm: 0 0 0 1px var(--color-ink-800);
+  --shadow-md: 0 0 0 1px var(--color-ink-700), 0 6px 18px rgb(0 0 0 / 0.55);
+  --shadow-lg: 0 0 0 1px var(--color-ink-500), 0 16px 40px rgb(0 0 0 / 0.65);
+}
+
+/* The design system names its tokens `--color-bg` / `--color-text` / `--space-*`.
+   Keep those names resolving so the ported component layer below reads from the
+   same variables the upstream system documents. */
+:root {
+  --color-bg: var(--color-ground);
+  --color-text: var(--color-ink);
+  --color-accent: var(--color-payum);
+  --color-divider: color-mix(in srgb, var(--color-ink) 16%, transparent);
+
+  --font-heading: var(--font-sans);
+  --font-body: var(--font-sans);
+  --font-heading-weight: 500;
+
+  --space-1: 2.8px;
+  --space-2: 5.6px;
+  --space-3: 8.4px;
+  --space-4: 11.2px;
+  --space-6: 16.8px;
+  --space-8: 22.4px;
+}
+
+/* Nuxt UI's semantic surfaces, pointed at the Payum ground so any `U*`
+   component dropped onto a page lands in-palette. */
+:root,
+.dark {
+  --ui-bg: var(--color-ground);
+  --ui-bg-muted: var(--color-surface);
+  --ui-bg-elevated: var(--color-surface);
+  --ui-bg-accented: var(--color-ink-900);
+  --ui-border: color-mix(in srgb, var(--color-ink) 9%, transparent);
+  --ui-border-muted: color-mix(in srgb, var(--color-ink) 8%, transparent);
+  --ui-border-accented: color-mix(in srgb, var(--color-ink) 14%, transparent);
+  --ui-text: var(--color-ink);
+  --ui-text-muted: color-mix(in srgb, var(--color-ink) 62%, transparent);
+  --ui-text-dimmed: color-mix(in srgb, var(--color-ink) 45%, transparent);
+}
+
+@layer base {
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    /* Ground plus a fine grain. Large dark fields band and read cheap; a low
+       amplitude fractal noise gives the surface tooth so the lifted ground
+       looks like a material instead of a flat fill. It is a background layer
+       rather than an overlay element, so it sits behind all content and cannot
+       touch text contrast. */
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E") repeat,
+      var(--color-ground);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.55;
+    overflow-x: clip;
+    text-wrap: pretty;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+    font-weight: var(--font-heading-weight);
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+  }
+
+  h1 { font-size: 42px; }
+  h2 { font-size: 32px; }
+  h3 { font-size: 25px; }
+  h4 { font-size: 20px; }
+  h5 { font-size: 16px; }
+
+  /* Deliberately NOT an uppercase tracked kicker. An eyebrow above a heading
+     is banned on this site; leaving the costume in the base layer is how six of
+     them ended up on one page. h6 is just the smallest heading step. */
+  h6 {
+    font-size: 13.5px;
+  }
+
+  /* payum-400, not the raw accent: #cf2439 as text measures 3.39:1 on the
+     ground and fails AA. Borders and fills still use the accent itself, which
+     only owes 3:1 as a non-text element. */
+  a {
+    color: var(--color-payum-400);
+    text-decoration: none;
+    text-underline-offset: 3px;
+  }
+
+  a:hover {
+    color: var(--color-payum-300);
+  }
+
+  /* Themed interaction states — never the browser defaults. */
+  :focus {
+    outline: none;
+  }
+
+  /* payum-400, not the raw accent. SC 1.4.11 wants 3:1 for a focus indicator
+     and #cf2439 only clears it on the page ground (3.39:1) — it measures
+     2.98:1 on `--color-surface` and 2.77:1 on the framework-card tint, so the
+     ring failed on exactly the controls sitting inside panels. payum-400 is
+     6.59:1 on surface and passes everywhere.
+
+     `transition-property: none` because Tailwind's `transition-colors` includes
+     `outline-color`: without this the ring fades in over 150ms and spends its
+     first ~100ms below 3:1, which is the moment it is most needed. */
+  :focus-visible {
+    outline: 2px solid var(--color-payum-400);
+    outline-offset: 2px;
+    /* `!important` earns its place exactly here: `transition-colors` is a
+       utility, so it outranks this rule and would otherwise fade the ring in
+       over 150ms — leaving it below 3:1 for the first ~100ms of focus, which
+       is precisely when it is needed. A focus indicator is not negotiable by
+       a utility class. */
+    transition-property: none !important;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+  }
+}
+
+@layer components {
+  /* The page measure: one shell for every section so the left edge of a
+     heading lines up down the whole page. */
+  .shell {
+    max-width: 1180px;
+    margin-inline: auto;
+    padding-inline: clamp(20px, 4vw, 40px);
+  }
+
+  /* — buttons: the primary is an accent outline, never a fill — */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    font-family: var(--font-heading);
+    font-weight: var(--font-heading-weight);
+    font-size: 14px;
+    line-height: 1.2;
+    color: var(--color-text);
+    background: transparent;
+    border: 1px solid transparent;
+    padding: var(--space-2) calc(var(--space-3) * 1.2);
+    border-radius: var(--radius-md);
+  }
+
+  .btn-primary {
+    color: var(--color-payum-400);
+    border-color: var(--color-accent);
+  }
+
+  .btn-primary:hover {
+    color: var(--color-payum-300);
+    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  }
+
+  .btn-primary:active {
+    background: color-mix(in srgb, var(--color-accent) 22%, transparent);
+  }
+
+  .btn-secondary {
+    border-color: var(--color-divider);
+  }
+
+  .btn-secondary:hover {
+    color: var(--color-text);
+    background: color-mix(in srgb, var(--color-text) 7%, transparent);
+  }
+
+  .btn-secondary:active {
+    background: color-mix(in srgb, var(--color-text) 14%, transparent);
+  }
+
+  /* — tags — */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    padding: 3px 10px;
+    border-radius: calc(var(--radius-md) * 0.75);
+  }
+
+  .tag-neutral {
+    background: var(--color-ink-800);
+    color: var(--color-ink-100);
+  }
+
+  .tag-outline {
+    border: 1px solid var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  /* — grid rules —
+     Internal grid lines are drawn as 1px shadows on each cell rather than
+     borders, so the outer frame never doubles up. */
+  .cell-rule-x {
+    box-shadow: 1px 0 0 color-mix(in srgb, var(--color-text) 9%, transparent);
+  }
+
+  .cell-rule-xy {
+    box-shadow:
+      1px 0 0 color-mix(in srgb, var(--color-text) 8%, transparent),
+      0 1px 0 color-mix(in srgb, var(--color-text) 8%, transparent);
+  }
+
+  /* — the payment state machine —
+     The page's one authored motion: an accent walks the STATUS_* list in the
+     order a real payment moves through it, so the section demonstrates its own
+     claim instead of describing it. Paused until scrolled into view (see
+     LandingStatuses.vue), and absent entirely under reduced motion — the list
+     stays fully readable either way, so nothing is carried by motion alone. */
+  .status-machine {
+    --status-cycle: 9.8s;
+    --status-step: 1.4s;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .status-row {
+      /* Runs ONCE, not infinitely. SC 2.2.2 (Level A) requires a stop
+         mechanism for auto-starting motion past five seconds, and an
+         IntersectionObserver is not one — it stops the motion precisely when
+         nobody is looking at it. A single sweep on arrival still performs
+         "state machine you can inspect" and then stops competing with the
+         text it sits inside. */
+      animation: payum-status-walk var(--status-cycle) linear 1;
+      animation-delay: calc(var(--i) * var(--status-step));
+      animation-play-state: paused;
+    }
+
+    .status-machine[data-running='true'] .status-row {
+      animation-play-state: running;
+    }
+  }
+
+  /* The gateway swap in the hero. Only the tinted lines carry this class and
+     only they are re-created on swap, so this fires on exactly the code that
+     changed while the rest of the file holds still — which is the thing the
+     caption asks the visitor to check. Declares a `from` only, so a line that
+     never animates is still fully legible. */
+  @media (prefers-reduced-motion: no-preference) {
+    .code-line-swap {
+      animation: payum-code-swap 260ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+  }
+
+  @keyframes payum-code-swap {
+    from {
+      background-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+      opacity: 0.4;
+    }
+  }
+
+  /* Scroll entrances.
+
+     The hidden state is scoped to `.reveal-ready`, a class only an executed
+     head script can add. Without JS, or if hydration dies, nothing is ever
+     hidden — the failure mode of a reveal system must not be a blank page.
+     A failsafe in app.vue reveals everything after 2.5s regardless. */
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal-ready [data-reveal] {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+
+    .reveal-ready [data-reveal].is-revealed {
+      opacity: 1;
+      transform: none;
+      transition:
+        opacity 560ms cubic-bezier(0.16, 1, 0.3, 1),
+        transform 560ms cubic-bezier(0.16, 1, 0.3, 1);
+      transition-delay: var(--reveal-delay, 0ms);
+    }
+  }
+
+  @keyframes payum-status-walk {
+    0%,
+    12% {
+      background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+      box-shadow: inset 1px 0 0 var(--color-accent);
+    }
+
+    20%,
+    100% {
+      background-color: transparent;
+      box-shadow: inset 0 0 0 transparent;
+    }
+  }
+
+}
