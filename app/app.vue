@@ -1,4 +1,11 @@
 <script setup lang="ts">
+const route = useRoute()
+// nuxt-site-config's own resolver, so the canonical URL is built from the same
+// `site.url` — and the same trailing-slash rule — that @nuxtjs/sitemap uses for
+// its <loc> entries. The address the sitemap advertises and the one the page
+// claims cannot drift apart.
+const canonicalUrl = withSiteUrl(computed(() => route.path))
+
 useHead({
   meta: [
     { name: 'viewport', content: 'width=device-width, initial-scale=1' }
@@ -12,7 +19,8 @@ useHead({
     { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16.png' },
     // Now possible: the 200px source downscales to 180 cleanly, where the
     // original 60px one would have had to be upscaled and gone soft.
-    { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' }
+    { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
+    { rel: 'canonical', href: canonicalUrl }
   ],
   htmlAttrs: {
     lang: 'en'
@@ -37,6 +45,7 @@ useSeoMeta({
   description,
   ogTitle: title,
   ogDescription: description,
+  ogUrl: canonicalUrl,
   twitterCard: 'summary_large_image'
 })
 

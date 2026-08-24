@@ -16,6 +16,8 @@
     "@nuxt/fonts": "0.14.0",
     "@nuxt/ui": "^4.10.0",
     "@nuxtjs/color-mode": "4.0.1",
+    "@nuxtjs/robots": "^6.2.0",
+    "@nuxtjs/sitemap": "^8.5.0",
     "nuxt": "^4.5.1",
     "tailwindcss": "^4.3.3"
   },
