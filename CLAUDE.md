@@ -31,6 +31,8 @@ There is no test framework configured. CI (`.github/workflows/ci.yml`, Node 22) 
 
 The trade this repo has already made once: `/sitemap.xml` was briefly a hand-written Nitro route plus a build module that derived URLs from `pages:extend`. It worked, but it cost two non-obvious Nuxt-internals bugs (Nitro's prerenderer rebuilds from a deep copy of the config, so late-injected values reach the server bundle but not the prerender pass; and an alias typed as `.d.mts` won't resolve in the server tsconfig) — incidental complexity that bought nothing a module didn't already handle. `@nuxtjs/sitemap` replaced all of it.
 
+**A logged exception: markdown content negotiation** (see "Markdown for agents") is hand-written. No official module does it — `nuxt-llms` (nuxtlabs) only generates `llms.txt` and never touches page responses. The one module that fits, `nuxt-llms-txt`, was 9 days old with a single publish, 168 monthly downloads and no other work from its author, and it would have run in the SSR request path of a payment library's site. It also uses `addServerHandler({ middleware: true })`, which loses to Nitro's public-assets handler exactly as our own first attempt did — so it would not have avoided the prerender constraint either. Revisit if it gains a track record, or drop the whole thing if the Cloudflare zone ever reaches a Pro plan.
+
 Weigh the dependency honestly rather than by reflex: measure what it actually adds to *this* lockfile, not its raw transitive count. Sitemap and robots came to ~23 packages because Nuxt already carried the rest. Prefer a focused module over an umbrella one when only part of the surface is needed, and say so in the config comment.
 
 ## Architecture
@@ -66,7 +68,7 @@ Only two Iconify collections are bundled: `@iconify-json/lucide` (`i-lucide-*`) 
 
 ### Rendering
 
-`routeRules` prerenders `/` only. Any new marketing page that should be static needs its own `routeRules` entry; otherwise it is server-rendered on demand.
+`routeRules` is empty — **nothing is prerendered**, and that is deliberate. See "Markdown for agents" below before adding a `prerender` entry: prerendering a route silently disables markdown content negotiation for it.
 
 ### Sitemap and robots
 
@@ -80,6 +82,21 @@ Configure them through the `sitemap` / `robots` keys in `nuxt.config.ts` rather 
 
 - **Dynamic routes are not auto-discovered.** A `[slug].vue` page produces no `<loc>` on its own; enumerate its URLs with the sitemap module's `sources` (an API endpoint) or `urls` option.
 - **Canonical stays hand-written.** `app.vue` sets `rel=canonical` itself; the sitemap and robots modules don't. `nuxt-seo-utils` (or the `@nuxtjs/seo` umbrella, which also pulls in schema.org and og-image) would take that over if the SEO surface grows enough to justify it.
+
+### Markdown for agents
+
+Requests carrying `Accept: text/markdown` get a markdown representation of the page; everything else gets HTML. `server/middleware/markdown-negotiation.ts` does the negotiation, `server/utils/landing-markdown.ts` builds the document.
+
+The markdown is **generated from `app/utils/landing.ts`**, the same data the Vue components render — not scraped from the rendered HTML. A copy edit therefore lands in both representations at once, with no drift and no conversion library. The cost is that a new page needs a renderer wired into `RENDERERS` in the middleware; if that ever becomes a chore, converting rendered HTML instead is the escape hatch.
+
+**Prerendering and negotiation are mutually exclusive.** Nitro composes its handlers as `[publicAssets, ...serverMiddleware, ...routes]`, so a prerendered route is answered from `.output/public` before any middleware runs and the `Accept` header is never read. This is why `routeRules` is empty. The failure is silent — the build succeeds, browsers are fine, and only an agent notices it gets HTML — so `modules/markdown-negotiation.ts` **fails the build** if a negotiated path is also prerendered. Don't work around that guard; either drop the prerender rule or remove the path from `NEGOTIATED_PATHS`.
+
+Two more things that are easy to get wrong:
+
+- **`*/*` must keep returning HTML.** curl and most HTTP libraries send it, and it expresses no preference; only an explicit `text/markdown` that outranks `text/html` wins. The q-value comparison in `prefersMarkdown` is what enforces that.
+- **`Cache-Control: private, no-store` on markdown responses is load-bearing.** `Vary: Accept` is set, but Cloudflare's free tier does not key its cache on `Vary` — without `no-store` a markdown body can be cached at the edge and then served to a browser asking for HTML.
+
+An alternative worth knowing about: Cloudflare's [Markdown for Agents](https://developers.cloudflare.com/fundamentals/reference/markdown-for-agents/) does all of this at the edge with no application code, and adds `x-original-tokens` too — but it needs a **Pro or Business** plan, so it was not an option here. If the zone is ever upgraded, this middleware, its util and its guard module can all be deleted in favour of that toggle.
 
 Two build gotchas worth knowing:
 

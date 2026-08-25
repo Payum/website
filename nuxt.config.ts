@@ -29,9 +29,11 @@ export default defineNuxtConfig({
     fallback: 'dark'
   },
 
-  routeRules: {
-    '/': { prerender: true }
-  },
+  // `/` is deliberately NOT prerendered. Nitro answers prerendered routes from
+  // .output/public before any server middleware runs, which would make the
+  // Accept: text/markdown negotiation in server/middleware unreachable. See
+  // "Markdown for agents" in CLAUDE.md before adding prerender entries here.
+  routeRules: {},
 
   compatibilityDate: '2026-06-30',
 
