@@ -68,7 +68,7 @@ Only two Iconify collections are bundled: `@iconify-json/lucide` (`i-lucide-*`) 
 
 ### Rendering
 
-`routeRules` is empty — **nothing is prerendered**, and that is deliberate. See "Markdown for agents" below before adding a `prerender` entry: prerendering a route silently disables markdown content negotiation for it.
+`routeRules` holds a single entry: `/docs/**` proxies to GitBook (`proxy.gitbook.site/sites/site_8vpXf`). The docs live at `payum.dev/docs` rather than on a subdomain so they rank on one domain. GitBook's subdirectory setting does the rest: it redirects `docs.payum.dev` and writes `payum.dev/docs` canonicals and sitemap entries, and `robots.sitemap` lists that sitemap. Link to the docs with absolute `https://payum.dev/docs/...` URLs, never `NuxtLink`, because client-side routing can't reach a proxied path. **Nothing is prerendered**, and that is deliberate. See "Markdown for agents" below before adding a `prerender` entry: prerendering a route silently disables markdown content negotiation for it.
 
 ### Sitemap and robots
 
@@ -89,7 +89,7 @@ Requests carrying `Accept: text/markdown` get a markdown representation of the p
 
 The markdown is **generated from `app/utils/landing.ts`**, the same data the Vue components render — not scraped from the rendered HTML. A copy edit therefore lands in both representations at once, with no drift and no conversion library. The cost is that a new page needs a renderer wired into `RENDERERS` in the middleware; if that ever becomes a chore, converting rendered HTML instead is the escape hatch.
 
-**Prerendering and negotiation are mutually exclusive.** Nitro composes its handlers as `[publicAssets, ...serverMiddleware, ...routes]`, so a prerendered route is answered from `.output/public` before any middleware runs and the `Accept` header is never read. This is why `routeRules` is empty. The failure is silent — the build succeeds, browsers are fine, and only an agent notices it gets HTML — so `modules/markdown-negotiation.ts` **fails the build** if a negotiated path is also prerendered. Don't work around that guard; either drop the prerender rule or remove the path from `NEGOTIATED_PATHS`.
+**Prerendering and negotiation are mutually exclusive.** Nitro composes its handlers as `[publicAssets, ...serverMiddleware, ...routes]`, so a prerendered route is answered from `.output/public` before any middleware runs and the `Accept` header is never read. This is why `routeRules` has no prerender entries. The failure is silent — the build succeeds, browsers are fine, and only an agent notices it gets HTML — so `modules/markdown-negotiation.ts` **fails the build** if a negotiated path is also prerendered. Don't work around that guard; either drop the prerender rule or remove the path from `NEGOTIATED_PATHS`.
 
 Two more things that are easy to get wrong:
 

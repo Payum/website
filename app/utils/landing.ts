@@ -1,15 +1,15 @@
 /** Content for the landing page, kept out of the templates so copy edits
  *  don't mean touching markup. Mirrors the design's `renderVals()`. */
 
-export const DOCS_URL = 'https://docs.payum.dev/'
+export const DOCS_URL = 'https://payum.dev/docs/'
 /** The first-hour path, not the docs root. A "read the docs" action that lands
  *  on a table of contents makes the visitor do the routing themselves. */
-export const GET_STARTED_URL = 'https://docs.payum.dev/get-it-started'
+export const GET_STARTED_URL = 'https://payum.dev/docs/get-it-started'
 /** The project's own Omnipay comparison — first-party, so it can be cited
  *  rather than paraphrased into claims of our own. */
-export const OMNIPAY_URL = 'https://docs.payum.dev/payum-vs-omnipay'
-export const GATEWAYS_DOCS_URL = 'https://docs.payum.dev/supported-gateways'
-export const INTEGRATIONS_DOCS_URL = 'https://docs.payum.dev/frameworks-and-e-commerce-integration'
+export const OMNIPAY_URL = 'https://payum.dev/docs/payum-vs-omnipay'
+export const GATEWAYS_DOCS_URL = 'https://payum.dev/docs/supported-gateways'
+export const INTEGRATIONS_DOCS_URL = 'https://payum.dev/docs/frameworks-and-e-commerce-integration'
 export const GITHUB_URL = 'https://github.com/Payum/Payum'
 export const PACKAGIST_URL = 'https://packagist.org/packages/payum/payum'
 export const RELEASES_URL = 'https://github.com/Payum/Payum/releases'

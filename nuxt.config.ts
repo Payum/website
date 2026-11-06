@@ -33,7 +33,13 @@ export default defineNuxtConfig({
   // .output/public before any server middleware runs, which would make the
   // Accept: text/markdown negotiation in server/middleware unreachable. See
   // "Markdown for agents" in CLAUDE.md before adding prerender entries here.
-  routeRules: {},
+  routeRules: {
+    // The GitBook docs, served from payum.dev/docs so they rank on this domain
+    // rather than on a docs subdomain. Nitro strips the /docs prefix and forwards
+    // the rest of the path and the query string. The upstream URL is the
+    // "proxy URL" in GitBook > Site settings > Domain and redirects > Subdirectory.
+    '/docs/**': { proxy: 'https://proxy.gitbook.site/sites/site_8vpXf/**' }
+  },
 
   compatibilityDate: '2026-06-30',
 
@@ -52,5 +58,10 @@ export default defineNuxtConfig({
     families: [
       { name: 'JetBrains Mono', provider: 'google', styles: ['normal'] }
     ]
+  },
+
+  // GitBook publishes its own sitemap for the proxied /docs pages (see routeRules).
+  robots: {
+    sitemap: ['/docs/sitemap.xml']
   }
 })
