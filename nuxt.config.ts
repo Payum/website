@@ -5,6 +5,7 @@ export default defineNuxtConfig({
     '@nuxt/ui',
     '@nuxt/fonts',
     '@nuxtjs/color-mode',
+    '@nuxt/scripts',
     '@nuxtjs/robots',
     '@nuxtjs/sitemap'
   ],
@@ -63,5 +64,14 @@ export default defineNuxtConfig({
   // GitBook publishes its own sitemap for the proxied /docs pages (see routeRules).
   robots: {
     sitemap: ['/docs/sitemap.xml']
+  },
+
+  // GA4, loaded globally from the registry so every page — current and
+  // future — is tracked with no per-page code. SPA navigations are counted by
+  // GA4's enhanced measurement ("page changes based on browser history events").
+  scripts: {
+    registry: {
+      googleAnalytics: { id: 'G-D6J87XCK7H', trigger: 'onNuxtReady' }
+    }
   }
 })
